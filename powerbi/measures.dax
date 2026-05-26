@@ -1,0 +1,29 @@
+Total Countings =
+SUM ( powerbi_map_counter_locations[total_hourly_countings] )
+
+Average Hourly Count =
+AVERAGE ( powerbi_map_counter_locations[avg_hourly_countings] )
+
+Counter Locations =
+DISTINCTCOUNT ( powerbi_map_counter_locations[meter_id] )
+
+Under-covered Arrondissements =
+CALCULATE (
+    DISTINCTCOUNT ( powerbi_arrondissement_coverage[arrondissement] ),
+    powerbi_arrondissement_coverage[coverage_status] = "Under-covered"
+)
+
+No Data Arrondissements =
+CALCULATE (
+    DISTINCTCOUNT ( powerbi_arrondissement_coverage[arrondissement] ),
+    powerbi_arrondissement_coverage[coverage_status] = "No data"
+)
+
+Coverage Gap =
+AVERAGE ( powerbi_arrondissement_coverage[meters_vs_hourly_gap_pct] )
+
+Daily Countings =
+SUM ( powerbi_daily_arrondissement_traffic[daily_countings] )
+
+Average Daily Countings =
+AVERAGE ( powerbi_daily_arrondissement_traffic[daily_countings] )

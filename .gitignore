@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.DS_Store
+
+# Local heavyweight source/export files.
+data/traffic_enriched.csv
+data/cycling_clean_sample.csv
+
+# Optional local notebooks and raw data.
+*.ipynb_checkpoints/
+*.pbix
