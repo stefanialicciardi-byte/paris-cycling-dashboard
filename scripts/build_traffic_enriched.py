@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 import pandas as pd
 import requests
@@ -6,11 +7,11 @@ from sklearn.cluster import KMeans
 
 
 ROOT = Path(__file__).resolve().parents[1]
-DOWNLOADS = Path("/Users/stefi/Downloads")
-RAW_PATH = DOWNLOADS / "comptage-velo-donnees-compteurs (2).csv"
-HOLIDAYS_PATH = DOWNLOADS / "paris_zone_c_school_holidays.csv"
-WMO_PATH = DOWNLOADS / "wmo_weather_codes.csv"
-LOOKUP_PATH = DOWNLOADS / "meter_arrondissment.csv"
+SOURCE_DIR = Path(os.environ.get("CYCLING_SOURCE_DIR", ROOT / "raw"))
+RAW_PATH = SOURCE_DIR / "comptage-velo-donnees-compteurs (2).csv"
+HOLIDAYS_PATH = SOURCE_DIR / "paris_zone_c_school_holidays.csv"
+WMO_PATH = SOURCE_DIR / "wmo_weather_codes.csv"
+LOOKUP_PATH = SOURCE_DIR / "meter_arrondissment.csv"
 OUTPUT_PATH = ROOT / "data" / "traffic_enriched.csv"
 
 RAW_COLUMNS = [

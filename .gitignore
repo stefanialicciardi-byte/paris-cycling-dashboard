@@ -10,3 +10,4 @@ data/cycling_clean_sample.csv
 # Optional local notebooks and raw data.
 *.ipynb_checkpoints/
 *.pbix
+raw/
