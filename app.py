@@ -97,6 +97,38 @@ def inject_app_style() -> None:
                 font-size: 1.35rem;
                 font-weight: 650;
             }
+            section[data-testid="stSidebar"] {
+                background: #f3f5f9;
+            }
+            section[data-testid="stSidebar"] [data-testid="stRadio"] > div {
+                gap: 0.65rem;
+            }
+            section[data-testid="stSidebar"] [data-testid="stRadio"] label {
+                min-height: 2.55rem;
+                margin: 0;
+                padding: 0.45rem 0.95rem;
+                border-radius: 0.55rem;
+                color: #4b5563;
+                font-size: 1.04rem;
+                font-weight: 500;
+                transition: background 120ms ease, color 120ms ease;
+            }
+            section[data-testid="stSidebar"] [data-testid="stRadio"] label:hover {
+                background: #e8edf6;
+                color: #111827;
+            }
+            section[data-testid="stSidebar"] [data-testid="stRadio"] label:has(input:checked) {
+                background: #dbe2ee;
+                color: #111827;
+                font-weight: 750;
+            }
+            section[data-testid="stSidebar"] [data-testid="stRadio"] label > div:first-child {
+                display: none;
+            }
+            section[data-testid="stSidebar"] [data-testid="stRadio"] p {
+                font-size: 1.04rem;
+                line-height: 1.35;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -776,7 +808,6 @@ if st.session_state.get("page") not in page_options:
     st.session_state["page"] = "Introduction"
 
 with st.sidebar:
-    st.markdown("### Navigation")
     page = st.radio(
         "Page",
         page_options,
