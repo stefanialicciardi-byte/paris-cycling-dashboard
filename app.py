@@ -471,7 +471,7 @@ filtered = filter_traffic(traffic)
 
 st.title("Paris Cycling Traffic Dashboard")
 st.caption(
-    "Interactive dashboard based on the DataProject_CyclingTraffic notebook and exported CSV files."
+    "Tracking Paris cycling flows through counters, weather, and time."
 )
 
 if filtered.empty:
