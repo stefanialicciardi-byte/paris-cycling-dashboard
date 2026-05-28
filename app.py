@@ -279,9 +279,15 @@ def show_intro_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
         unsafe_allow_html=True,
     )
 
-    if st.button("Explore the interactive dashboard", type="primary"):
-        st.session_state["page"] = "Interactive Dashboard"
-        st.rerun()
+    st.button(
+        "Explore the interactive dashboard",
+        type="primary",
+        on_click=go_to_interactive_dashboard,
+    )
+
+
+def go_to_interactive_dashboard() -> None:
+    st.session_state["page"] = "Interactive Dashboard"
 
 
 def show_page_title(title: str, subtitle: str | None = None) -> None:
