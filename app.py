@@ -79,6 +79,24 @@ def inject_app_style() -> None:
                 border-radius: 6px;
                 color: #134e4a;
             }
+            .date-range-box {
+                margin-top: 1.35rem;
+                padding: 0.95rem 1.1rem;
+                border: 1px solid #dbe4f0;
+                border-radius: 6px;
+                background: #f8fafc;
+            }
+            .date-range-label {
+                color: #4b5563;
+                font-size: 0.9rem;
+                font-weight: 700;
+            }
+            .date-range-value {
+                margin-top: 0.2rem;
+                color: #111827;
+                font-size: 1.35rem;
+                font-weight: 650;
+            }
         </style>
         """,
         unsafe_allow_html=True,
@@ -337,11 +355,22 @@ def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     ]
     st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
     c1.metric("Rows analyzed", f"{len(df):,}")
-    c2.metric("Date range", f"{df['date'].min().date()} - {df['date'].max().date()}")
-    c3.metric("Weather classes", f"{df['weather_condition'].nunique():,}")
-    c4.metric("Arrondissements", f"{summary['arrondissement'].nunique()}/20")
+    c2.metric("Weather classes", f"{df['weather_condition'].nunique():,}")
+    c3.metric("Arrondissements", f"{summary['arrondissement'].nunique()}/20")
+
+    start_date = df["date"].min().strftime("%B %-d, %Y")
+    end_date = df["date"].max().strftime("%B %-d, %Y")
+    st.markdown(
+        f"""
+        <div class="date-range-box">
+            <div class="date-range-label">Date range</div>
+            <div class="date-range-value">{start_date} - {end_date}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 def show_data_preparation_page(df: pd.DataFrame) -> None:
