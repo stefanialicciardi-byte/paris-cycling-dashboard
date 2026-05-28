@@ -363,6 +363,7 @@ def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
         "Data Sources",
         "The project combines bicycle counter records with weather, calendar, and coverage context.",
     )
+    source_rows = int(df["counter_locations"].sum())
     rows = [
         {
             "Source": "Paris bicycle counters",
@@ -388,9 +389,14 @@ def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Rows analyzed", f"{len(df):,}")
+    c1.metric("Dashboard records", f"{len(df):,}")
     c2.metric("Weather classes", f"{df['weather_condition'].nunique():,}")
     c3.metric("Arrondissements", f"{summary['arrondissement'].nunique()}/20")
+
+    st.caption(
+        f"The deployed dashboard uses {len(df):,} aggregated records representing "
+        f"about {source_rows:,} original counter-hour rows."
+    )
 
     start_date = df["date"].min().strftime("%B %-d, %Y")
     end_date = df["date"].max().strftime("%B %-d, %Y")
