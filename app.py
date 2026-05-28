@@ -1,3 +1,4 @@
+from base64 import b64encode
 from pathlib import Path
 
 import pandas as pd
@@ -16,6 +17,7 @@ TRAFFIC_PATH = BASE_DIR / "data" / "streamlit_public_traffic.csv"
 FULL_TRAFFIC_PATH = BASE_DIR / "data" / "traffic_enriched.csv"
 SAMPLE_TRAFFIC_PATH = BASE_DIR / "data" / "cycling_clean_sample.csv"
 SUMMARY_PATH = BASE_DIR / "data" / "cycling_traffic_summary.csv"
+HERO_IMAGE_PATH = BASE_DIR / "assets" / "paris-cycling-hero.jpg"
 WEEKDAY_ORDER = [
     "Monday",
     "Tuesday",
@@ -48,6 +50,12 @@ ARRONDISSEMENT_AREA_KM2 = {
     19: 6.79,
     20: 5.98,
 }
+
+
+def image_as_data_uri(path: Path) -> str:
+    image_bytes = path.read_bytes()
+    encoded = b64encode(image_bytes).decode("utf-8")
+    return f"data:image/jpeg;base64,{encoded}"
 
 
 @st.cache_data
@@ -191,6 +199,116 @@ def filter_traffic(df: pd.DataFrame) -> pd.DataFrame:
         filtered = filtered[~filtered["school_holiday"]]
 
     return filtered
+
+
+def show_intro_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
+    total_countings = df["hourly_countings"].sum()
+    counter_count = int(summary["n_meters"].sum())
+    start_date = df["date"].min().strftime("%b %Y")
+    end_date = df["date"].max().strftime("%b %Y")
+
+    hero_background = image_as_data_uri(HERO_IMAGE_PATH) if HERO_IMAGE_PATH.exists() else ""
+    st.markdown(
+        f"""
+        <style>
+            .intro-hero {{
+                min-height: 430px;
+                padding: clamp(2.2rem, 6vw, 5rem);
+                display: flex;
+                align-items: flex-end;
+                border-radius: 0;
+                color: #ffffff;
+                background:
+                    linear-gradient(90deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.34), rgba(15, 23, 42, 0.08)),
+                    url("{hero_background}");
+                background-size: cover;
+                background-position: center;
+            }}
+            .intro-copy {{
+                max-width: 760px;
+            }}
+            .intro-kicker {{
+                margin-bottom: 0.75rem;
+                color: #bfdbfe;
+                font-size: 0.84rem;
+                font-weight: 700;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+            }}
+            .intro-title {{
+                margin: 0;
+                font-size: clamp(3rem, 6vw, 5.8rem);
+                line-height: 0.96;
+                font-weight: 800;
+                letter-spacing: 0;
+            }}
+            .intro-subtitle {{
+                margin-top: 1.25rem;
+                max-width: 620px;
+                color: #e5e7eb;
+                font-size: clamp(1.05rem, 2vw, 1.35rem);
+                line-height: 1.55;
+            }}
+            .intro-section {{
+                padding: 2.3rem 0 0.4rem 0;
+            }}
+            .intro-section h2 {{
+                margin-bottom: 0.8rem;
+                font-size: 1.55rem;
+            }}
+            .intro-section p {{
+                color: #4b5563;
+                font-size: 1.02rem;
+                line-height: 1.65;
+            }}
+        </style>
+        <section class="intro-hero">
+            <div class="intro-copy">
+                <div class="intro-kicker">Paris bicycle counter analysis</div>
+                <h1 class="intro-title">Cycling Through Paris</h1>
+                <p class="intro-subtitle">
+                    A data story about everyday bicycle movement across the city,
+                    from commute peaks to weather-sensitive riding patterns.
+                </p>
+            </div>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Total bicycle countings", f"{total_countings:,.0f}")
+    c2.metric("Counter locations", f"{counter_count:,.0f}")
+    c3.metric("Observation window", f"{start_date} - {end_date}")
+
+    st.markdown(
+        """
+        <section class="intro-section">
+            <h2>What This Dashboard Reveals</h2>
+            <p>
+                Paris cycling activity follows a clear urban rhythm. This project brings
+                together counter readings, weather, school holidays, time patterns, and
+                arrondissement coverage to show how bicycle traffic changes across the city.
+            </p>
+        </section>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col1, col2, col3 = st.columns(3)
+    with col1:
+        st.subheader("Time")
+        st.write("Compare weekday, weekend, hourly, and holiday patterns.")
+    with col2:
+        st.subheader("Conditions")
+        st.write("See how temperature, rain, and snowfall relate to cycling volume.")
+    with col3:
+        st.subheader("Coverage")
+        st.write("Check whether counter placement reflects arrondissement demand.")
+
+    if st.button("Explore the dashboard", type="primary"):
+        st.session_state["page"] = "Dashboard"
+        st.rerun()
 
 
 def show_kpis(filtered: pd.DataFrame, summary: pd.DataFrame) -> None:
@@ -467,6 +585,23 @@ if "coverage_status" not in traffic.columns:
         on="arrondissement",
         how="left",
     )
+
+with st.sidebar:
+    st.header("Navigation")
+    page = st.radio(
+        "Page",
+        ["Introduction", "Dashboard"],
+        key="page",
+        label_visibility="collapsed",
+    )
+
+if page == "Introduction":
+    show_intro_page(traffic, summary)
+    st.caption(
+        "Project by Sascha Behrens, Victoria Ford, and Stefania Licciardi - Data Analytics Bootcamp"
+    )
+    st.stop()
+
 filtered = filter_traffic(traffic)
 
 st.title("Paris Cycling Traffic Dashboard")
