@@ -1,4 +1,3 @@
-from base64 import b64encode
 from pathlib import Path
 
 import pandas as pd
@@ -52,10 +51,38 @@ ARRONDISSEMENT_AREA_KM2 = {
 }
 
 
-def image_as_data_uri(path: Path) -> str:
-    image_bytes = path.read_bytes()
-    encoded = b64encode(image_bytes).decode("utf-8")
-    return f"data:image/jpeg;base64,{encoded}"
+def inject_app_style() -> None:
+    st.markdown(
+        """
+        <style>
+            .section-copy {
+                color: #374151;
+                font-size: 1.02rem;
+                line-height: 1.65;
+            }
+            .objective-box {
+                margin-top: 2rem;
+                padding: 1.1rem 1.35rem;
+                border-left: 5px solid #2563eb;
+                background: #eef4ff;
+                border-radius: 6px;
+            }
+            .objective-box strong {
+                display: block;
+                margin-bottom: 0.35rem;
+            }
+            .takeaway-box {
+                margin: 1.1rem 0 0.5rem 0;
+                padding: 1rem 1.15rem;
+                border-left: 5px solid #0f766e;
+                background: #ecfdf5;
+                border-radius: 6px;
+                color: #134e4a;
+            }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 @st.cache_data
@@ -207,74 +234,33 @@ def show_intro_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     start_date = df["date"].min().strftime("%b %Y")
     end_date = df["date"].max().strftime("%b %Y")
 
-    hero_background = image_as_data_uri(HERO_IMAGE_PATH) if HERO_IMAGE_PATH.exists() else ""
-    st.markdown(
-        f"""
-        <style>
-            .intro-hero {{
-                min-height: 430px;
-                padding: clamp(2.2rem, 6vw, 5rem);
-                display: flex;
-                align-items: flex-end;
-                border-radius: 0;
-                color: #ffffff;
-                background:
-                    linear-gradient(90deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.34), rgba(15, 23, 42, 0.08)),
-                    url("{hero_background}");
-                background-size: cover;
-                background-position: center;
-            }}
-            .intro-copy {{
-                max-width: 760px;
-            }}
-            .intro-kicker {{
-                margin-bottom: 0.75rem;
-                color: #bfdbfe;
-                font-size: 0.84rem;
-                font-weight: 700;
-                letter-spacing: 0.08em;
-                text-transform: uppercase;
-            }}
-            .intro-title {{
-                margin: 0;
-                font-size: clamp(3rem, 6vw, 5.8rem);
-                line-height: 0.96;
-                font-weight: 800;
-                letter-spacing: 0;
-            }}
-            .intro-subtitle {{
-                margin-top: 1.25rem;
-                max-width: 620px;
-                color: #e5e7eb;
-                font-size: clamp(1.05rem, 2vw, 1.35rem);
-                line-height: 1.55;
-            }}
-            .intro-section {{
-                padding: 2.3rem 0 0.4rem 0;
-            }}
-            .intro-section h2 {{
-                margin-bottom: 0.8rem;
-                font-size: 1.55rem;
-            }}
-            .intro-section p {{
-                color: #4b5563;
-                font-size: 1.02rem;
-                line-height: 1.65;
-            }}
-        </style>
-        <section class="intro-hero">
-            <div class="intro-copy">
-                <div class="intro-kicker">Paris bicycle counter analysis</div>
-                <h1 class="intro-title">Cycling Through Paris</h1>
-                <p class="intro-subtitle">
-                    A data story about everyday bicycle movement across the city,
-                    from commute peaks to weather-sensitive riding patterns.
-                </p>
-            </div>
-        </section>
-        """,
-        unsafe_allow_html=True,
-    )
+    st.title("Cycling Through Paris")
+    st.caption("Tracking Paris cycling flows through counters, weather, and time.")
+    st.divider()
+
+    left, right = st.columns([1.25, 1])
+    with left:
+        st.subheader("Project Context")
+        st.markdown(
+            """
+            <p class="section-copy">
+            Cycling has become a central part of Paris mobility, but the pattern
+            is not uniform across the city. Traffic rises and falls with commuting
+            hours, school calendars, weather conditions, and the placement of
+            bicycle counters.
+            </p>
+            <p class="section-copy">
+            This project uses public bicycle counter data enriched with contextual
+            variables to explore when cycling demand is strongest and whether
+            counter coverage reflects that demand across arrondissements.
+            </p>
+            """,
+            unsafe_allow_html=True,
+        )
+    with right:
+        if HERO_IMAGE_PATH.exists():
+            st.image(HERO_IMAGE_PATH, width="stretch")
+            st.caption("Generated editorial image for the dashboard introduction.")
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Total bicycle countings", f"{total_countings:,.0f}")
@@ -282,33 +268,187 @@ def show_intro_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     c3.metric("Observation window", f"{start_date} - {end_date}")
 
     st.markdown(
-        """
-        <section class="intro-section">
-            <h2>What This Dashboard Reveals</h2>
-            <p>
-                Paris cycling activity follows a clear urban rhythm. This project brings
-                together counter readings, weather, school holidays, time patterns, and
-                arrondissement coverage to show how bicycle traffic changes across the city.
-            </p>
-        </section>
+        f"""
+        <div class="objective-box">
+            <strong>Project Objective</strong>
+            Build an interactive analytical foundation for understanding Paris bicycle
+            traffic across time, weather, holidays, and arrondissement coverage using
+            {counter_count:,} counter locations and {total_countings:,.0f} recorded countings.
+        </div>
         """,
         unsafe_allow_html=True,
     )
 
-    col1, col2, col3 = st.columns(3)
-    with col1:
-        st.subheader("Time")
-        st.write("Compare weekday, weekend, hourly, and holiday patterns.")
-    with col2:
-        st.subheader("Conditions")
-        st.write("See how temperature, rain, and snowfall relate to cycling volume.")
-    with col3:
-        st.subheader("Coverage")
-        st.write("Check whether counter placement reflects arrondissement demand.")
-
-    if st.button("Explore the dashboard", type="primary"):
-        st.session_state["page"] = "Dashboard"
+    if st.button("Explore the interactive dashboard", type="primary"):
+        st.session_state["page"] = "Interactive Dashboard"
         st.rerun()
+
+
+def show_page_title(title: str, subtitle: str | None = None) -> None:
+    st.title(title)
+    if subtitle:
+        st.caption(subtitle)
+    st.divider()
+
+
+def show_takeaway(text: str) -> None:
+    st.markdown(
+        f"""
+        <div class="takeaway-box">
+            <strong>Takeaway</strong><br>{text}
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+
+def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
+    show_page_title(
+        "Data Sources",
+        "The project combines bicycle counter records with weather, calendar, and coverage context.",
+    )
+    rows = [
+        {
+            "Source": "Paris bicycle counters",
+            "Role in project": "Hourly traffic signal by location and arrondissement",
+            "Used for": "Traffic volume, hourly patterns, maps, demand shares",
+        },
+        {
+            "Source": "Weather context",
+            "Role in project": "Temperature, precipitation, and simplified weather category",
+            "Used for": "Weather impact and condition-based comparisons",
+        },
+        {
+            "Source": "School holiday calendar",
+            "Role in project": "Boolean school-holiday indicator",
+            "Used for": "Holiday vs non-holiday traffic patterns",
+        },
+        {
+            "Source": "Arrondissement coverage summary",
+            "Role in project": "Area, meter count, and traffic share by arrondissement",
+            "Used for": "Coverage gap analysis",
+        },
+    ]
+    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Rows analyzed", f"{len(df):,}")
+    c2.metric("Date range", f"{df['date'].min().date()} - {df['date'].max().date()}")
+    c3.metric("Weather classes", f"{df['weather_condition'].nunique():,}")
+    c4.metric("Arrondissements", f"{summary['arrondissement'].nunique()}/20")
+
+
+def show_data_preparation_page(df: pd.DataFrame) -> None:
+    show_page_title(
+        "Data Preparation",
+        "A compact ETL workflow turns raw counter records into analysis-ready dashboard data.",
+    )
+    st.markdown(
+        """
+        1. Standardized date, hour, weekday, holiday, and weather fields.
+        2. Normalized weather labels into dashboard-friendly categories.
+        3. Added weekend and school-holiday indicators for behavioral comparisons.
+        4. Aggregated arrondissement-level meter, area, and traffic shares.
+        5. Created coverage-status labels to compare counter placement with observed demand.
+        """
+    )
+
+    sample_cols = [
+        "date",
+        "hour",
+        "weekday",
+        "arrondissement",
+        "hourly_countings",
+        "temperature",
+        "precipitation",
+        "weather_condition",
+        "school_holiday",
+        "coverage_status",
+    ]
+    st.subheader("Analysis-Ready Sample")
+    st.dataframe(df[sample_cols].head(12), hide_index=True, width="stretch")
+    show_takeaway(
+        "The preparation step makes the dashboard more than a chart collection: each visual can compare time, place, weather, and coverage with consistent fields."
+    )
+
+
+def show_cycling_patterns_page(df: pd.DataFrame) -> None:
+    show_page_title(
+        "Cycling Patterns",
+        "Daily and weekly rhythms reveal how strongly cycling traffic reflects commuting behavior.",
+    )
+    left, right = st.columns(2)
+    with left:
+        plot_hourly_patterns(df, "story_patterns")
+    with right:
+        plot_calendar_patterns(df, "story_patterns")
+    show_takeaway(
+        "The strongest signals are temporal: average traffic rises around commute periods and weekdays behave differently from weekends."
+    )
+
+
+def show_weather_impact_page(df: pd.DataFrame) -> None:
+    show_page_title(
+        "Weather Impact",
+        "Weather adds useful context for interpreting lower-volume days and seasonal differences.",
+    )
+    left, right = st.columns(2)
+    with left:
+        plot_weather(df, "story_weather")
+    with right:
+        corr = df[["hourly_countings", "temperature", "precipitation"]].corr()
+        fig_corr = px.imshow(
+            corr,
+            text_auto=".2f",
+            color_continuous_scale="RdBu_r",
+            zmin=-1,
+            zmax=1,
+            title="Correlation Heatmap",
+        )
+        fig_corr.update_layout(height=420)
+        st.plotly_chart(fig_corr, width="stretch")
+    show_takeaway(
+        "Rain and snowfall are associated with lower bicycle counts, while temperature provides additional context for daily variation."
+    )
+
+
+def show_counter_coverage_page(summary: pd.DataFrame) -> None:
+    show_page_title(
+        "Counter Coverage",
+        "Coverage analysis compares where counters are placed with where observed cycling demand appears.",
+    )
+    plot_coverage(summary)
+    show_takeaway(
+        "Some arrondissements carry a larger share of traffic than their share of meters, which suggests potential under-coverage in parts of the city."
+    )
+
+
+def show_conclusion_page() -> None:
+    show_page_title(
+        "Conclusion",
+        "The project shows how cycling demand changes by time, conditions, and measurement coverage.",
+    )
+    st.markdown(
+        """
+        **Main findings**
+
+        - Cycling traffic has clear morning and evening commuting peaks.
+        - Weekday traffic is stronger than weekend traffic.
+        - School holidays reduce cycling volume, especially during commute periods.
+        - Rain and snowfall are linked with lower cycling counts.
+        - Counter coverage is not perfectly aligned with observed traffic demand.
+
+        **Future improvements**
+
+        - Add bicycle-lane infrastructure data.
+        - Compare demand with population, employment, or land-use density.
+        - Include longer seasonal history.
+        - Add predictive modeling for expected traffic under different weather conditions.
+        """
+    )
+    show_takeaway(
+        "The dashboard can support both exploration and communication: users can inspect the data interactively, while the story pages summarize the analytical logic."
+    )
 
 
 def show_kpis(filtered: pd.DataFrame, summary: pd.DataFrame) -> None:
@@ -585,108 +725,130 @@ if "coverage_status" not in traffic.columns:
         on="arrondissement",
         how="left",
     )
+inject_app_style()
+
+page_options = [
+    "Introduction",
+    "Data Sources",
+    "Data Preparation",
+    "Cycling Patterns",
+    "Weather Impact",
+    "Counter Coverage",
+    "Interactive Dashboard",
+    "Conclusion",
+]
+if st.session_state.get("page") not in page_options:
+    st.session_state["page"] = "Introduction"
 
 with st.sidebar:
-    st.header("Navigation")
+    st.markdown("### Navigation")
     page = st.radio(
         "Page",
-        ["Introduction", "Dashboard"],
+        page_options,
         key="page",
         label_visibility="collapsed",
     )
 
 if page == "Introduction":
     show_intro_page(traffic, summary)
+elif page == "Data Sources":
+    show_data_sources_page(traffic, summary)
+elif page == "Data Preparation":
+    show_data_preparation_page(traffic)
+elif page == "Cycling Patterns":
+    show_cycling_patterns_page(traffic)
+elif page == "Weather Impact":
+    show_weather_impact_page(traffic)
+elif page == "Counter Coverage":
+    show_counter_coverage_page(summary)
+elif page == "Conclusion":
+    show_conclusion_page()
+else:
+    filtered = filter_traffic(traffic)
+
+    st.title("Paris Cycling Traffic Dashboard")
     st.caption(
-        "Project by Sascha Behrens, Victoria Ford, and Stefania Licciardi - Data Analytics Bootcamp"
+        "Tracking Paris cycling flows through counters, weather, and time."
     )
-    st.stop()
 
-filtered = filter_traffic(traffic)
+    if filtered.empty:
+        st.warning("No data available for the selected filters.")
+        st.stop()
 
-st.title("Paris Cycling Traffic Dashboard")
-st.caption(
-    "Tracking Paris cycling flows through counters, weather, and time."
-)
+    show_kpis(filtered, summary)
 
-if filtered.empty:
-    st.warning("No data available for the selected filters.")
-    st.stop()
-
-show_kpis(filtered, summary)
-
-overview_tab, traffic_tab, weather_tab, map_tab, coverage_tab, data_tab = st.tabs(
-    [
-        "Overview",
-        "Traffic Patterns",
-        "Weather & Holidays",
-        "Map",
-        "Coverage",
-        "Data",
-    ]
-)
-
-with overview_tab:
-    st.subheader("Project Summary")
-    st.markdown(
-        """
-        The project analyzes Paris bicycle counter data enriched with calendar,
-        school holiday, weather, and arrondissement coverage context. The core
-        question is where and when cycling traffic is strongest, and whether
-        counter coverage reflects actual cycling demand.
-        """
+    overview_tab, traffic_tab, weather_tab, map_tab, coverage_tab, data_tab = st.tabs(
+        [
+            "Overview",
+            "Traffic Patterns",
+            "Weather & Holidays",
+            "Map",
+            "Coverage",
+            "Data",
+        ]
     )
-    c1, c2 = st.columns(2)
-    with c1:
-        plot_hourly_patterns(filtered, "overview")
-    with c2:
+
+    with overview_tab:
+        st.subheader("Project Summary")
         st.markdown(
             """
-            **Key findings from the notebook**
-
-            - Cycling traffic has clear morning and evening commuting peaks.
-            - Weekday traffic is stronger than weekend traffic.
-            - School holidays reduce cycling volume, especially during commute periods.
-            - Rain and snowfall are associated with lower cycling counts.
-            - Some central arrondissements have high traffic but relatively low meter coverage.
+            The project analyzes Paris bicycle counter data enriched with calendar,
+            school holiday, weather, and arrondissement coverage context. The core
+            question is where and when cycling traffic is strongest, and whether
+            counter coverage reflects actual cycling demand.
             """
         )
+        c1, c2 = st.columns(2)
+        with c1:
+            plot_hourly_patterns(filtered, "overview")
+        with c2:
+            st.markdown(
+                """
+                **Key findings from the notebook**
 
-with traffic_tab:
-    left, right = st.columns(2)
-    with left:
-        plot_hourly_patterns(filtered, "traffic")
-    with right:
-        plot_calendar_patterns(filtered, "traffic")
+                - Cycling traffic has clear morning and evening commuting peaks.
+                - Weekday traffic is stronger than weekend traffic.
+                - School holidays reduce cycling volume, especially during commute periods.
+                - Rain and snowfall are associated with lower cycling counts.
+                - Some central arrondissements have high traffic but relatively low meter coverage.
+                """
+            )
 
-with weather_tab:
-    left, right = st.columns(2)
-    with left:
-        plot_weather(filtered, "weather")
-    with right:
-        corr = filtered[["hourly_countings", "temperature", "precipitation"]].corr()
-        fig_corr = px.imshow(
-            corr,
-            text_auto=".2f",
-            color_continuous_scale="RdBu_r",
-            zmin=-1,
-            zmax=1,
-            title="Correlation Heatmap",
-        )
-        fig_corr.update_layout(height=420)
-        st.plotly_chart(fig_corr, width="stretch")
+    with traffic_tab:
+        left, right = st.columns(2)
+        with left:
+            plot_hourly_patterns(filtered, "traffic")
+        with right:
+            plot_calendar_patterns(filtered, "traffic")
 
-with map_tab:
-    plot_map(filtered)
+    with weather_tab:
+        left, right = st.columns(2)
+        with left:
+            plot_weather(filtered, "weather")
+        with right:
+            corr = filtered[["hourly_countings", "temperature", "precipitation"]].corr()
+            fig_corr = px.imshow(
+                corr,
+                text_auto=".2f",
+                color_continuous_scale="RdBu_r",
+                zmin=-1,
+                zmax=1,
+                title="Correlation Heatmap",
+            )
+            fig_corr.update_layout(height=420)
+            st.plotly_chart(fig_corr, width="stretch")
 
-with coverage_tab:
-    plot_coverage(summary)
+    with map_tab:
+        plot_map(filtered)
 
-with data_tab:
-    st.subheader("Filtered Traffic Data")
-    st.dataframe(filtered, width="stretch", hide_index=True)
-    st.subheader("Arrondissement Coverage Summary")
-    st.dataframe(summary, width="stretch", hide_index=True)
+    with coverage_tab:
+        plot_coverage(summary)
+
+    with data_tab:
+        st.subheader("Filtered Traffic Data")
+        st.dataframe(filtered, width="stretch", hide_index=True)
+        st.subheader("Arrondissement Coverage Summary")
+        st.dataframe(summary, width="stretch", hide_index=True)
 
 st.caption(
     "Project by Sascha Behrens, Victoria Ford, and Stefania Licciardi - Data Analytics Bootcamp"
