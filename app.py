@@ -530,7 +530,8 @@ def show_conclusion_page() -> None:
         - Weekday traffic is stronger than weekend traffic.
         - School holidays reduce cycling volume, especially during commute periods.
         - Rain and snowfall are linked with lower cycling counts.
-        - The map helps locate where counter activity is concentrated across Paris.
+        - The map compares counter-meter coverage with observed cycling activity by arrondissement.
+        - Some arrondissements have stronger cycling demand than their share of counters suggests.
 
         **Future improvements**
 
@@ -545,15 +546,11 @@ def show_conclusion_page() -> None:
     )
 
 
-def show_kpis(filtered: pd.DataFrame, summary: pd.DataFrame) -> None:
-    start_date = filtered["date"].min().strftime("%b %Y")
-    end_date = filtered["date"].max().strftime("%b %Y")
-
-    col1, col2, col3, col4 = st.columns(4)
+def show_kpis(summary: pd.DataFrame) -> None:
+    col1, col2, col3 = st.columns(3)
     col1.metric("Total Cycling Count", f"{summary['total_hourly'].sum():,.0f}")
     col2.metric("Counter Meters", f"{summary['n_meters'].sum():,.0f}")
     col3.metric("Paris Arrondissements", f"{len(ARRONDISSEMENT_AREA_KM2)}")
-    col4.metric("Observation Window", f"{start_date} - {end_date}")
 
 
 def plot_hourly_patterns(filtered: pd.DataFrame, key_prefix: str) -> None:
@@ -831,7 +828,7 @@ else:
         st.warning("No data available for the selected filters.")
         st.stop()
 
-    show_kpis(filtered, summary)
+    show_kpis(summary)
 
     overview_tab, traffic_tab, weather_tab, map_tab = st.tabs(
         [
@@ -893,6 +890,14 @@ else:
             st.plotly_chart(fig_corr, width="stretch")
 
     with map_tab:
+        st.markdown(
+            """
+            This map summarizes counter coverage by arrondissement. Marker size
+            represents the number of counter meters, while color compares each
+            arrondissement's meter share with its cycling-traffic share:
+            **red** is under-covered, **blue** is balanced, and **green** is over-covered.
+            """
+        )
         plot_map(summary)
 
 st.caption(
