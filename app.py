@@ -523,6 +523,12 @@ def show_conclusion_page() -> None:
         - Counter meters are not evenly distributed across Paris.
         - Some busy central areas appear under-covered because their traffic share is higher than their meter share.
 
+        **Recommendations**
+
+        - Add counters in high-traffic under-covered areas, especially the 3rd, 7th, 10th, and 11th arrondissements.
+        - Use weather and school-holiday patterns when interpreting short-term drops in cycling volume.
+        - Combine counter coverage with cycling infrastructure data before deciding where to expand monitoring.
+
         **Future improvements**
 
         - Add bicycle-lane infrastructure data.
