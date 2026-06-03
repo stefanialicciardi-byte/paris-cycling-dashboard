@@ -546,12 +546,14 @@ def show_conclusion_page() -> None:
 
 
 def show_kpis(filtered: pd.DataFrame, summary: pd.DataFrame) -> None:
-    col1, col2, col3, col4, col5 = st.columns(5)
-    col1.metric("Total Countings", f"{filtered['hourly_countings'].sum():,.0f}")
-    col2.metric("Average Hourly Count", f"{filtered['hourly_countings'].mean():.1f}")
-    col3.metric("Counter Locations", f"{filtered[['latitude', 'longitude']].drop_duplicates().shape[0]:,}")
-    col4.metric("Average Temperature", f"{filtered['temperature'].mean():.1f} °C")
-    col5.metric("Arrondissements", f"{summary['arrondissement'].nunique()}/20")
+    start_date = filtered["date"].min().strftime("%b %Y")
+    end_date = filtered["date"].max().strftime("%b %Y")
+
+    col1, col2, col3, col4 = st.columns(4)
+    col1.metric("Total Cycling Count", f"{summary['total_hourly'].sum():,.0f}")
+    col2.metric("Counter Meters", f"{summary['n_meters'].sum():,.0f}")
+    col3.metric("Arrondissements Covered", f"{summary['arrondissement'].nunique()}")
+    col4.metric("Observation Window", f"{start_date} - {end_date}")
 
 
 def plot_hourly_patterns(filtered: pd.DataFrame, key_prefix: str) -> None:
