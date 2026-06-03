@@ -317,7 +317,9 @@ def show_intro_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     end_date = df["date"].max().strftime("%b %Y")
 
     st.title("Cycling Through Paris")
-    st.caption("Tracking Paris cycling flows through counters, weather, and time.")
+    st.caption(
+        "An interactive view of Paris cycling activity, from commute peaks to weather patterns and urban coverage."
+    )
     st.divider()
 
     left, right = st.columns([1.25, 1])
@@ -809,7 +811,7 @@ else:
 
     st.title("Paris Cycling Traffic Dashboard")
     st.caption(
-        "Tracking Paris cycling flows through counters, weather, and time."
+        "An interactive view of Paris cycling activity, from commute peaks to weather patterns and urban coverage."
     )
 
     if filtered.empty:
