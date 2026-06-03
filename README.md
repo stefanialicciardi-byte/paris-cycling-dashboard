@@ -1,56 +1,76 @@
 # Paris Cycling Traffic Dashboard
 
-Interactive dashboard for exploring bicycle traffic patterns in Paris.
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=streamlit&logoColor=white)
+![Plotly](https://img.shields.io/badge/Plotly-3F4F75?style=for-the-badge&logo=plotly&logoColor=white)
+![Pandas](https://img.shields.io/badge/Pandas-150458?style=for-the-badge&logo=pandas&logoColor=white)
 
-The project uses bicycle counter data enriched with weather, school-holiday, and arrondissement coverage information. The goal is to understand daily and weekly cycling patterns, identify the effect of external conditions, and evaluate whether counter coverage reflects where cycling activity is highest.
+An interactive Streamlit dashboard exploring Paris cycling activity, from commute peaks to weather patterns and urban counter coverage.
 
-## Project Questions
+**Live app:** https://paris-cycling-dashboard-sw82zmv87tc5sxqluddjrj.streamlit.app/
 
-- At which hours is cycling traffic highest?
-- How do weekday and weekend patterns differ?
-- Does cycling traffic change during school holidays?
-- How does weather relate to bicycle counts?
-- Which arrondissements appear under-covered by counting sensors?
+![Paris Cycling Dashboard introduction](assets/paris-cycling-hero.jpg)
 
-## Dashboard
+## Project Overview
 
-The Streamlit dashboard includes:
+Cycling has become a central part of Paris mobility, but demand is not evenly distributed across the city. This project uses Paris bicycle counter data enriched with weather, school-holiday, and arrondissement context to understand when cycling traffic is strongest and whether counter coverage reflects observed demand.
 
-- Overview KPIs for cycling counts and counter coverage
-- Hourly traffic trends
-- Weekday vs weekend comparison
-- School holiday analysis
-- Weather impact analysis
-- Interactive map of counter locations
-- Arrondissement coverage gap analysis
+The dashboard is designed as both an analytical portfolio project and a practical urban-mobility monitoring tool.
 
-## Data
+## Key Questions
 
-The app uses two deployment-ready CSV files:
+- When does cycling traffic peak during the day?
+- How do weekday and weekend cycling patterns differ?
+- Do school holidays change cycling volume?
+- How are rain, snowfall, and temperature linked with bicycle counts?
+- Which arrondissements show gaps between cycling demand and counter coverage?
 
-```text
-data/streamlit_public_traffic.csv
-data/cycling_traffic_summary.csv
-```
+## Data Sources
 
-The full enriched dataset contains 947,231 rows. Because the file is too large for a normal GitHub repository, the deployed version uses an aggregated extract that keeps the relevant fields for the dashboard.
+The analysis combines three data layers:
 
-The source traffic data contains records for 15 Paris arrondissements:
+| Dataset | Role in the project |
+| --- | --- |
+| Paris cycling traffic | Hourly bicycle counts by counter meter, timestamp, and location |
+| Weather context | Temperature, precipitation, weather codes, and simplified weather categories |
+| School holiday calendar | Holiday flags used to compare normal and school-holiday travel patterns |
 
-```text
-1, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 17, 19, 20
-```
+The full enriched dataset contains **947,231 counter-hour records** and **24 final columns**. Because the full file is too large for a normal GitHub repository, the deployed app uses deployment-safe CSV exports while preserving the analytical fields needed for the dashboard.
 
-The coverage analysis still displays all 20 arrondissements. Arrondissements without records are marked as `No data`.
+## Dashboard Highlights
 
-## Main Files
+- KPI summary of total cycling count, counter meters, and Paris arrondissement scope
+- Overview of commuting peaks and notebook findings
+- Interactive map showing counter coverage by arrondissement
+- Hourly and calendar-based cycling pattern analysis
+- Weather and school-holiday comparison views
+- Compact recommendations for improving counter placement
+
+## Main Findings
+
+- Cycling traffic has clear morning and evening commuting peaks.
+- Weekday traffic is stronger than weekend traffic.
+- School holidays reduce cycling volume, especially during commute periods.
+- Rain and snowfall are linked with lower cycling counts.
+- Counter meters are not evenly distributed across Paris.
+- Some busy central areas appear under-covered because their traffic share is higher than their meter share.
+
+## Recommendations
+
+- Add counters in high-traffic under-covered areas, especially the 3rd, 7th, 10th, and 11th arrondissements.
+- Use weather and school-holiday patterns when interpreting short-term drops in cycling volume.
+- Combine counter coverage with cycling infrastructure data before deciding where to expand monitoring.
+
+## Repository Structure
 
 ```text
 app.py                                  Streamlit dashboard
-data/streamlit_public_traffic.csv       Aggregated traffic data for deployment
+assets/paris-cycling-hero.jpg           Dashboard introduction image
+data/streamlit_public_traffic.csv       Deployment-safe traffic extract
 data/cycling_traffic_summary.csv        Arrondissement coverage summary
-powerbi/                                Power BI-ready map exports
+powerbi/                                Power BI-ready exports and notes
 scripts/                                Data preparation and export scripts
+requirements.txt                        Python dependencies
 ```
 
 ## Run Locally
@@ -70,7 +90,7 @@ http://localhost:8501
 
 ## Rebuild The Data
 
-The full source files are not included in this repository. To rebuild the enriched dataset locally, place the raw source files in a local `raw/` folder, or set `CYCLING_SOURCE_DIR` to the folder containing them.
+The full raw source files are not included in this repository. To rebuild the enriched dataset locally, place the raw source files in a local `raw/` folder, or set `CYCLING_SOURCE_DIR` to the folder containing them.
 
 Then run:
 
@@ -82,21 +102,15 @@ python scripts/export_powerbi_map_data.py
 
 ## Power BI Exports
 
-The `powerbi/` folder contains CSV files for building a map report in Power BI:
+The `powerbi/` folder contains CSV files and notes for building a related map report in Power BI:
 
 - `powerbi_map_counter_locations.csv`
 - `powerbi_arrondissement_coverage.csv`
 - `powerbi_daily_arrondissement_traffic.csv`
+- `measures.dax`
+- `paris_cycling_theme.json`
 
-Suggested map setup:
-
-- Latitude: `latitude`
-- Longitude: `longitude`
-- Size: `total_hourly_countings`
-- Legend: `coverage_status`
-- Tooltip fields: `meter_name`, `arrondissement_label`, `avg_hourly_countings`, `meters_vs_hourly_gap_pct`
-
-## Tools
+## Tech Stack
 
 - Python
 - Pandas
@@ -104,6 +118,10 @@ Suggested map setup:
 - Plotly
 - Power BI
 
-## Author
+## Authors
 
-Stefania Licciardi
+- Stefania Licciardi
+- Victoria Ford
+- Sascha Behrens
+
+Data Analytics Bootcamp project.

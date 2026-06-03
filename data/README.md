@@ -14,10 +14,7 @@ This folder contains deployment-safe CSV files used by the Streamlit dashboard.
 
 ## Arrondissement Coverage
 
-The source traffic records cover 15 arrondissements:
-
-```text
-1, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 17, 19, 20
-```
-
-The dashboard map uses the arrondissement rows present in this summary file.
+The dashboard presents Paris as a 20-arrondissement city context. The summary
+CSV stores the arrondissement-level rows used for the current counter coverage
+analysis, including meter counts, traffic share, area share, and coverage gap
+metrics.
