@@ -530,8 +530,9 @@ def show_conclusion_page() -> None:
         - Weekday traffic is stronger than weekend traffic.
         - School holidays reduce cycling volume, especially during commute periods.
         - Rain and snowfall are linked with lower cycling counts.
-        - The map compares counter-meter coverage with observed cycling activity by arrondissement.
-        - Some arrondissements have stronger cycling demand than their share of counters suggests.
+        - Counter meters are not evenly distributed across Paris.
+        - Some busy central areas appear under-covered because their traffic share is higher than their meter share.
+        - The 3e arrondissement is strongly under-covered, while the 12e arrondissement is over-covered relative to cycling demand.
 
         **Future improvements**
 
@@ -542,7 +543,7 @@ def show_conclusion_page() -> None:
         """
     )
     show_takeaway(
-        "The dashboard can support both exploration and communication: users can inspect the data interactively, while the story pages summarize the analytical logic."
+        "New counter placement should prioritize arrondissements where cycling activity is intense but meter coverage is relatively low."
     )
 
 
@@ -896,6 +897,8 @@ else:
             represents the number of counter meters, while color compares each
             arrondissement's meter share with its cycling-traffic share:
             **red** is under-covered, **blue** is balanced, and **green** is over-covered.
+            A negative gap means there are too few meters for the observed cycling
+            demand; a positive gap means there are more meters than traffic share suggests.
             """
         )
         plot_map(summary)
