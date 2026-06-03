@@ -704,7 +704,33 @@ def plot_weather(filtered: pd.DataFrame, key_prefix: str) -> None:
 
 def plot_map(summary: pd.DataFrame) -> None:
     map_data = summary.copy()
-    fig_map = px.scatter_map(
+    fig_outline = px.scatter_map(
+        map_data,
+        lat="latitude",
+        lon="longitude",
+        size="marker_size",
+        color_discrete_sequence=["#111827"],
+        size_max=46,
+        hover_name="arrondissement_full",
+        hover_data={
+            "n_meters": ":,",
+            "total_hourly": ":,.0f",
+            "area_share_pct": ":.1f",
+            "meters_share_pct": ":.1f",
+            "hourly_share_pct": ":.1f",
+            "meters_vs_hourly_gap_pct": ":.1f",
+            "marker_size": False,
+            "latitude": False,
+            "longitude": False,
+        },
+        zoom=11,
+        height=620,
+        title="Paris Cycling Counter Coverage by Arrondissement",
+    )
+    for trace in fig_outline.data:
+        trace.update(showlegend=False, hoverinfo="skip", marker={"opacity": 0.75})
+
+    fig_points = px.scatter_map(
         map_data,
         lat="latitude",
         lon="longitude",
@@ -727,10 +753,13 @@ def plot_map(summary: pd.DataFrame) -> None:
             "latitude": False,
             "longitude": False,
         },
+        size_max=34,
         zoom=11,
         height=620,
         title="Paris Cycling Counter Coverage by Arrondissement",
     )
+    fig_map = fig_outline
+    fig_map.add_traces(fig_points.data)
     fig_map.update_layout(
         map_style="open-street-map",
         legend_title="Coverage status",
