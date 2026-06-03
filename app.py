@@ -757,6 +757,18 @@ def plot_map(summary: pd.DataFrame) -> None:
     st.plotly_chart(fig_map, width="stretch")
 
 
+def show_coverage_legend() -> None:
+    st.markdown(
+        """
+        **Coverage status**
+
+        - **Over-covered:** More cycling meters than expected traffic
+        - **Under-covered:** Fewer cycling meters than expected traffic
+        - **Balanced:** Cycling meter coverage is proportional to traffic
+        """
+    )
+
+
 require_files()
 if TRAFFIC_PATH.exists():
     active_traffic_path = TRAFFIC_PATH
@@ -820,12 +832,12 @@ else:
 
     show_kpis(summary)
 
-    overview_tab, traffic_tab, weather_tab, map_tab = st.tabs(
+    overview_tab, map_tab, traffic_tab, weather_tab = st.tabs(
         [
             "Overview",
+            "Map",
             "Traffic Patterns",
             "Weather & Holidays",
-            "Map",
         ]
     )
 
@@ -855,6 +867,10 @@ else:
                 """
             )
 
+    with map_tab:
+        plot_map(summary)
+        show_coverage_legend()
+
     with traffic_tab:
         left, right = st.columns(2)
         with left:
@@ -878,19 +894,6 @@ else:
             )
             fig_corr.update_layout(height=420)
             st.plotly_chart(fig_corr, width="stretch")
-
-    with map_tab:
-        st.markdown(
-            """
-            This map summarizes counter coverage by arrondissement. Marker size
-            represents the number of counter meters, while color compares each
-            arrondissement's meter share with its cycling-traffic share:
-            **red** is under-covered, **blue** is balanced, and **green** is over-covered.
-            A negative gap means there are too few meters for the observed cycling
-            demand; a positive gap means there are more meters than traffic share suggests.
-            """
-        )
-        plot_map(summary)
 
 st.caption(
     "Project by Stefania Licciardi, Victoria Ford, and Sascha Behrens - Data Analytics Bootcamp"
