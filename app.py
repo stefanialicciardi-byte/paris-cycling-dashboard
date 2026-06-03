@@ -393,54 +393,133 @@ def show_takeaway(text: str) -> None:
 def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     show_page_title(
         "Data Sources",
-        "The dashboard is built from an enriched Paris cycling traffic dataset exported from the notebook.",
+        "Notebook extract used to build the dashboard dataset.",
     )
-    source_rows = int(df["counter_locations"].sum())
     st.markdown(
         """
-        The original notebook created `traffic_enriched.csv`, combining bicycle
-        counter readings with calendar fields, school-holiday flags, weather
-        variables, and arrondissement labels. For deployment, the app uses a
-        lighter aggregated extract while preserving the same analytical fields.
+        The analysis starts from `traffic_enriched`, a cleaned and enriched
+        counter-hour dataset. It combines Paris bicycle counter readings with
+        date fields, school holidays, weather, and arrondissement labels.
         """
     )
 
-    c1, c2, c3, c4 = st.columns(4)
-    c1.metric("Original Rows", f"{source_rows:,}")
-    c2.metric("Dashboard Records", f"{len(df):,}")
-    c3.metric("Columns", f"{len(df.columns):,}")
-    c4.metric("Weather Classes", f"{df['weather_condition'].nunique():,}")
-
-    start_date = df["date"].min().strftime("%B %-d, %Y")
-    end_date = df["date"].max().strftime("%B %-d, %Y")
-    st.markdown(
-        f"""
-        <div class="date-range-box">
-            <div class="date-range-label">Date range</div>
-            <div class="date-range-value">{start_date} - {end_date}</div>
-        </div>
-        """,
-        unsafe_allow_html=True,
+    st.subheader("traffic_enriched.info()")
+    st.code(
+        """<class 'pandas.core.frame.DataFrame'>
+RangeIndex: 947231 entries, 0 to 947230
+Data columns (total 24 columns):
+ #   Column                 Non-Null Count   Dtype
+---  ------                 --------------   -----
+ 0   meter_id               947231 non-null  object
+ 1   meter_name             947231 non-null  object
+ 2   meter_site_identifier  947231 non-null  float64
+ 3   meter_site_name        947231 non-null  object
+ 4   hourly_countings       947231 non-null  int64
+ 5   date_time_counting     947231 non-null  datetime64[ns, UTC]
+ 6   site_installation_date 947231 non-null  datetime64[ns, UTC]
+ 7   latitude               947231 non-null  float64
+ 8   longitude              947231 non-null  float64
+ 9   date                   947231 non-null  datetime64[ns]
+10   hour                   947231 non-null  int32
+11   weekday                947231 non-null  object
+12   is_weekend             947231 non-null  bool
+13   month                  947231 non-null  int32
+14   year                   947231 non-null  int32
+15   week                   947231 non-null  UInt32
+16   area                   947231 non-null  Int64
+17   is_school_holiday      947231 non-null  bool
+18   temperature            947231 non-null  float32
+19   precipitation          947231 non-null  float32
+20   weather_code           947231 non-null  int64
+21   code_description       947231 non-null  object
+22   weather_conditions     947231 non-null  object
+23   arrondissement         947231 non-null  int64
+dtypes: Int64(1), UInt32(1), bool(2), datetime64[ns, UTC](2), datetime64[ns](1), float32(2), float64(3), int32(3), int64(3), object(6)
+memory usage: 140.9+ MB""",
+        language="text",
     )
 
-    st.subheader("Preview of the dashboard extract")
-    preview_cols = [
-        "date",
-        "hour",
-        "weekday",
-        "arrondissement",
-        "hourly_countings",
-        "temperature",
-        "precipitation",
-        "weather_condition",
-        "school_holiday",
-        "counter_locations",
-    ]
-    st.dataframe(df[preview_cols].head(), hide_index=True, width="stretch")
-
-    show_takeaway(
-        "The Streamlit app reads the deployment-safe CSV, but the counts represent the enriched counter-hour records produced in the notebook."
+    st.subheader("traffic_enriched.head()")
+    head_preview = pd.DataFrame(
+        [
+            {
+                "meter_id": "100056041-101056041",
+                "meter_name": "147 avenue d'Italie S-N",
+                "meter_site_identifier": 100056041.0,
+                "meter_site_name": "147 avenue d'Italie",
+                "hourly_countings": 5,
+                "date_time_counting": "2025-07-04 02:00:00+00:00",
+                "site_installation_date": "2019-12-10 00:00:00+00:00",
+                "latitude": 48.82026,
+                "longitude": 2.35919,
+                "date": "2025-07-04",
+                "year": 2025,
+                "week": 27,
+                "area": 6,
+            },
+            {
+                "meter_id": "100056032-101056032",
+                "meter_name": "87 avenue de Flandre NE-SO",
+                "meter_site_identifier": 100056032.0,
+                "meter_site_name": "87 avenue de Flandre",
+                "hourly_countings": 155,
+                "date_time_counting": "2025-09-18 19:00:00+00:00",
+                "site_installation_date": "2019-11-05 00:00:00+00:00",
+                "latitude": 48.88926,
+                "longitude": 2.37472,
+                "date": "2025-09-18",
+                "year": 2025,
+                "week": 38,
+                "area": 5,
+            },
+            {
+                "meter_id": "100056041-101056041",
+                "meter_name": "147 avenue d'Italie S-N",
+                "meter_site_identifier": 100056041.0,
+                "meter_site_name": "147 avenue d'Italie",
+                "hourly_countings": 21,
+                "date_time_counting": "2025-07-04 03:00:00+00:00",
+                "site_installation_date": "2019-12-10 00:00:00+00:00",
+                "latitude": 48.82026,
+                "longitude": 2.35919,
+                "date": "2025-07-04",
+                "year": 2025,
+                "week": 27,
+                "area": 6,
+            },
+            {
+                "meter_id": "100056041-101056041",
+                "meter_name": "147 avenue d'Italie S-N",
+                "meter_site_identifier": 100056041.0,
+                "meter_site_name": "147 avenue d'Italie",
+                "hourly_countings": 157,
+                "date_time_counting": "2025-07-04 06:00:00+00:00",
+                "site_installation_date": "2019-12-10 00:00:00+00:00",
+                "latitude": 48.82026,
+                "longitude": 2.35919,
+                "date": "2025-07-04",
+                "year": 2025,
+                "week": 27,
+                "area": 6,
+            },
+            {
+                "meter_id": "100056032-101056032",
+                "meter_name": "87 avenue de Flandre NE-SO",
+                "meter_site_identifier": 100056032.0,
+                "meter_site_name": "87 avenue de Flandre",
+                "hourly_countings": 49,
+                "date_time_counting": "2025-09-18 22:00:00+00:00",
+                "site_installation_date": "2019-11-05 00:00:00+00:00",
+                "latitude": 48.88926,
+                "longitude": 2.37472,
+                "date": "2025-09-18",
+                "year": 2025,
+                "week": 38,
+                "area": 5,
+            },
+        ]
     )
+    st.dataframe(head_preview, hide_index=True, width="stretch")
 
 
 def show_data_preparation_page(df: pd.DataFrame) -> None:
