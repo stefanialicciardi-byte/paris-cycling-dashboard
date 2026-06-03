@@ -393,42 +393,23 @@ def show_takeaway(text: str) -> None:
 def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     show_page_title(
         "Data Sources",
-        "The project combines bicycle counter records with weather, calendar, and coverage context.",
+        "The dashboard is built from an enriched Paris cycling traffic dataset exported from the notebook.",
     )
     source_rows = int(df["counter_locations"].sum())
-    rows = [
-        {
-            "Source": "Paris bicycle counters",
-            "Role in project": "Hourly traffic signal by location and arrondissement",
-            "Used for": "Traffic volume, hourly patterns, maps, demand shares",
-        },
-        {
-            "Source": "Weather context",
-            "Role in project": "Temperature, precipitation, and simplified weather category",
-            "Used for": "Weather impact and condition-based comparisons",
-        },
-        {
-            "Source": "School holiday calendar",
-            "Role in project": "Boolean school-holiday indicator",
-            "Used for": "Holiday vs non-holiday traffic patterns",
-        },
-        {
-            "Source": "Arrondissement coverage summary",
-            "Role in project": "Area, meter count, and traffic share by arrondissement",
-            "Used for": "Coverage-status map and arrondissement context",
-        },
-    ]
-    st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
-
-    c1, c2, c3 = st.columns(3)
-    c1.metric("Dashboard records", f"{len(df):,}")
-    c2.metric("Weather classes", f"{df['weather_condition'].nunique():,}")
-    c3.metric("Arrondissements", f"{summary['arrondissement'].nunique()}/20")
-
-    st.caption(
-        f"The deployed dashboard uses {len(df):,} aggregated records representing "
-        f"about {source_rows:,} original counter-hour rows."
+    st.markdown(
+        """
+        The original notebook created `traffic_enriched.csv`, combining bicycle
+        counter readings with calendar fields, school-holiday flags, weather
+        variables, and arrondissement labels. For deployment, the app uses a
+        lighter aggregated extract while preserving the same analytical fields.
+        """
     )
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Original Rows", f"{source_rows:,}")
+    c2.metric("Dashboard Records", f"{len(df):,}")
+    c3.metric("Columns", f"{len(df.columns):,}")
+    c4.metric("Weather Classes", f"{df['weather_condition'].nunique():,}")
 
     start_date = df["date"].min().strftime("%B %-d, %Y")
     end_date = df["date"].max().strftime("%B %-d, %Y")
@@ -440,6 +421,25 @@ def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
         </div>
         """,
         unsafe_allow_html=True,
+    )
+
+    st.subheader("Preview of the dashboard extract")
+    preview_cols = [
+        "date",
+        "hour",
+        "weekday",
+        "arrondissement",
+        "hourly_countings",
+        "temperature",
+        "precipitation",
+        "weather_condition",
+        "school_holiday",
+        "counter_locations",
+    ]
+    st.dataframe(df[preview_cols].head(), hide_index=True, width="stretch")
+
+    show_takeaway(
+        "The Streamlit app reads the deployment-safe CSV, but the counts represent the enriched counter-hour records produced in the notebook."
     )
 
 

@@ -20,4 +20,4 @@ The source traffic records cover 15 arrondissements:
 1, 3, 4, 5, 7, 8, 10, 11, 12, 13, 14, 15, 17, 19, 20
 ```
 
-The dashboard coverage table includes all 20 Paris arrondissements and marks missing arrondissements as `No data`.
+The dashboard map uses the arrondissement rows present in this summary file.
