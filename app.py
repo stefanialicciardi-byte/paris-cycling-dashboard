@@ -831,13 +831,12 @@ else:
 
     show_kpis(filtered, summary)
 
-    overview_tab, traffic_tab, weather_tab, map_tab, data_tab = st.tabs(
+    overview_tab, traffic_tab, weather_tab, map_tab = st.tabs(
         [
             "Overview",
             "Traffic Patterns",
             "Weather & Holidays",
             "Map",
-            "Data",
         ]
     )
 
@@ -893,10 +892,6 @@ else:
 
     with map_tab:
         plot_map(summary)
-
-    with data_tab:
-        st.subheader("Filtered Traffic Data")
-        st.dataframe(filtered, width="stretch", hide_index=True)
 
 st.caption(
     "Project by Sascha Behrens, Victoria Ford, and Stefania Licciardi - Data Analytics Bootcamp"
