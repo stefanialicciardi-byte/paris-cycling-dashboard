@@ -186,14 +186,8 @@ def load_summary(path: Path) -> pd.DataFrame:
             summary[col].astype(str).str.replace("%", "", regex=False).astype(float)
         )
     summary["arrondissement"] = summary["arrondissement"].astype(int)
-    summary = (
-        summary.set_index("arrondissement")
-        .reindex(range(1, 21))
-        .rename_axis("arrondissement")
-        .reset_index()
-    )
     count_cols = ["n_rows", "n_meters", "total_hourly"]
-    summary[count_cols] = summary[count_cols].fillna(0).astype(int)
+    summary[count_cols] = summary[count_cols].astype(int)
     summary["area_km2"] = summary["arrondissement"].map(ARRONDISSEMENT_AREA_KM2)
 
     total_area = summary["area_km2"].sum()
@@ -231,7 +225,6 @@ def load_summary(path: Path) -> pd.DataFrame:
     summary.loc[summary["meters_vs_hourly_gap_pct"].abs() <= 1, "coverage_status"] = (
         "Balanced"
     )
-    summary.loc[summary["n_rows"] == 0, "coverage_status"] = "No data"
     summary["marker_size"] = summary["n_meters"].clip(lower=1)
     return summary.sort_values("arrondissement")
 
@@ -710,7 +703,7 @@ def plot_weather(filtered: pd.DataFrame, key_prefix: str) -> None:
 
 
 def plot_map(summary: pd.DataFrame) -> None:
-    map_data = summary[summary["n_rows"] > 0].copy()
+    map_data = summary.copy()
     fig_map = px.scatter_map(
         map_data,
         lat="latitude",
