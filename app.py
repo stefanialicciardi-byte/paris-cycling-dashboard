@@ -552,7 +552,7 @@ def show_kpis(filtered: pd.DataFrame, summary: pd.DataFrame) -> None:
     col1, col2, col3, col4 = st.columns(4)
     col1.metric("Total Cycling Count", f"{summary['total_hourly'].sum():,.0f}")
     col2.metric("Counter Meters", f"{summary['n_meters'].sum():,.0f}")
-    col3.metric("Arrondissements Covered", f"{summary['arrondissement'].nunique()}")
+    col3.metric("Paris Arrondissements", f"{len(ARRONDISSEMENT_AREA_KM2)}")
     col4.metric("Observation Window", f"{start_date} - {end_date}")
 
 
