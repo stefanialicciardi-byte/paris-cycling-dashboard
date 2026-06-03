@@ -710,7 +710,7 @@ def plot_weather(filtered: pd.DataFrame, key_prefix: str) -> None:
 
 
 def plot_map(summary: pd.DataFrame) -> None:
-    map_data = summary.copy()
+    map_data = summary[summary["n_rows"] > 0].copy()
     fig_map = px.scatter_map(
         map_data,
         lat="latitude",
@@ -721,7 +721,6 @@ def plot_map(summary: pd.DataFrame) -> None:
             "Under-covered": "#EF4444",
             "Balanced": "#2563EB",
             "Over-covered": "#16A34A",
-            "No data": "#9CA3AF",
         },
         hover_name="arrondissement_full",
         hover_data={
