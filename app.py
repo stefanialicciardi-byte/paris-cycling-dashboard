@@ -393,19 +393,20 @@ def show_takeaway(text: str) -> None:
 def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     show_page_title(
         "Data Sources",
-        "The dashboard combines Paris bicycle counter data with weather and school-holiday context.",
+        "The project combines cycling counts with weather and school-calendar context.",
     )
     st.markdown(
         """
-        The project starts from the Paris cycling traffic dataset, then enriches
-        each counter-hour record with external context so the dashboard can
-        compare traffic patterns across time, weather, holidays, and location.
+        The main dataset is the Paris cycling traffic dataset: hourly bicycle
+        counter records with meter names, timestamps, locations, and count
+        values. To make the analysis more meaningful, the project also uses
+        weather data and a school-holiday calendar.
         """
     )
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Counter-hour Records", "947,231")
-    c2.metric("Final Columns", "24")
+    c1.metric("Traffic Records", "947,231")
+    c2.metric("Data Sources", "3")
     c3.metric("Counter Meters", f"{int(summary['n_meters'].sum()):,}")
 
     st.subheader("Source datasets")
@@ -427,41 +428,25 @@ def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     )
     st.dataframe(source_table, hide_index=True, width="stretch")
 
-    st.subheader("Pre-processing and feature engineering")
-    st.markdown(
-        """
-        **Cycling traffic dataset**
-
-        - Column names were translated from French to English to make the analysis easier to read.
-        - Date fields were converted to datetime format, then split into useful features such as date, hour, weekday, month, year, and week.
-        - Geographic coordinates were separated into numeric latitude and longitude fields for map-based analysis.
-        - Missing values were reviewed, and unnecessary technical/photo fields were removed from the analysis.
-
-        **Enrichment datasets**
-
-        - Weather codes were matched to readable descriptions, then grouped into dashboard-friendly conditions: clear, light rain, heavy rain, and snowfall.
-        - School holidays were added as a boolean field so cycling volume can be compared between holiday and non-holiday periods.
-        - Arrondissement labels were added to connect individual counter records with Paris district-level coverage analysis.
-        """
-    )
-
     show_takeaway(
-        "The final dataset is not only a traffic table: it links each hourly count to time, place, weather, and school-calendar context."
+        "The source layer answers what was measured: bicycle counts, weather conditions, and whether each day fell during a school-holiday period."
     )
 
 
 def show_data_preparation_page(df: pd.DataFrame) -> None:
     show_page_title(
         "Data Preparation",
-        "A compact ETL workflow turns raw counter records into analysis-ready dashboard data.",
+        "Raw source tables were cleaned, enriched, and reshaped for dashboard analysis.",
     )
     st.markdown(
         """
-        1. Standardized date, hour, weekday, holiday, and weather fields.
-        2. Normalized weather labels into dashboard-friendly categories.
-        3. Added weekend and school-holiday indicators for behavioral comparisons.
-        4. Aggregated arrondissement-level meter, area, and traffic shares.
-        5. Created coverage-status labels to compare counter placement with observed demand.
+        1. Translated cycling-traffic column names from French to English.
+        2. Converted date fields to datetime format and extracted date, hour, weekday, month, year, and week.
+        3. Split geographic coordinates into numeric latitude and longitude fields for mapping.
+        4. Joined weather observations and simplified weather codes into clear, light rain, heavy rain, and snowfall.
+        5. Added weekend and school-holiday indicators for behavioral comparisons.
+        6. Aggregated arrondissement-level meter, area, and traffic shares.
+        7. Created coverage-status labels to compare counter placement with observed demand.
         """
     )
 
