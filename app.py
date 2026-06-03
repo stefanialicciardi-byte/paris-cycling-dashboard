@@ -485,21 +485,10 @@ def show_weather_impact_page(df: pd.DataFrame) -> None:
     )
 
 
-def show_counter_coverage_page(summary: pd.DataFrame) -> None:
-    show_page_title(
-        "Counter Coverage",
-        "Coverage analysis compares where counters are placed with where observed cycling demand appears.",
-    )
-    plot_coverage(summary)
-    show_takeaway(
-        "Some arrondissements carry a larger share of traffic than their share of meters, which suggests potential under-coverage in parts of the city."
-    )
-
-
 def show_conclusion_page() -> None:
     show_page_title(
         "Conclusion",
-        "The project shows how cycling demand changes by time, conditions, and measurement coverage.",
+        "The project shows how cycling demand changes by time, conditions, and place.",
     )
     st.markdown(
         """
@@ -509,7 +498,7 @@ def show_conclusion_page() -> None:
         - Weekday traffic is stronger than weekend traffic.
         - School holidays reduce cycling volume, especially during commute periods.
         - Rain and snowfall are linked with lower cycling counts.
-        - Counter coverage is not perfectly aligned with observed traffic demand.
+        - The map helps locate where counter activity is concentrated across Paris.
 
         **Future improvements**
 
@@ -716,73 +705,6 @@ def plot_map(filtered: pd.DataFrame) -> None:
     st.plotly_chart(fig_map, width="stretch")
 
 
-def plot_coverage(summary: pd.DataFrame) -> None:
-    col1, col2 = st.columns(2)
-    with col1:
-        coverage = summary.sort_values("arrondissement")
-        fig_gap = px.bar(
-            coverage,
-            x="arrondissement_label",
-            y="meters_vs_hourly_gap_pct",
-            color="coverage_status",
-            title="Meter Coverage Gap vs Cycling Demand",
-        )
-        fig_gap.update_layout(
-            xaxis_title="Arrondissement",
-            yaxis_title="Meters share - traffic share (pp)",
-            height=430,
-        )
-        st.plotly_chart(fig_gap, width="stretch")
-
-    with col2:
-        mix = summary.melt(
-            id_vars=["arrondissement_label"],
-            value_vars=["area_share_pct", "meters_share_pct", "hourly_share_pct"],
-            var_name="metric",
-            value_name="share_pct",
-        )
-        mix["metric"] = mix["metric"].map(
-            {
-                "area_share_pct": "Area share",
-                "meters_share_pct": "Meter share",
-                "hourly_share_pct": "Traffic share",
-            }
-        )
-        fig_mix = px.bar(
-            mix,
-            x="arrondissement_label",
-            y="share_pct",
-            color="metric",
-            barmode="group",
-            title="Area, Meter, and Traffic Share by Arrondissement",
-        )
-        fig_mix.update_layout(
-            xaxis_title="Arrondissement",
-            yaxis_title="Share of Paris total (%)",
-            height=430,
-            legend_title="Metric",
-        )
-        st.plotly_chart(fig_mix, width="stretch")
-
-    st.dataframe(
-        summary[
-            [
-                "arrondissement",
-                "n_meters",
-                "total_hourly",
-                "area_share_pct",
-                "meters_share_pct",
-                "hourly_share_pct",
-                "meter_vs_area_gap_pct",
-                "meters_vs_hourly_gap_pct",
-                "coverage_status",
-            ]
-        ].sort_values("arrondissement"),
-        width="stretch",
-        hide_index=True,
-    )
-
-
 require_files()
 if TRAFFIC_PATH.exists():
     active_traffic_path = TRAFFIC_PATH
@@ -806,7 +728,6 @@ page_options = [
     "Data Preparation",
     "Cycling Patterns",
     "Weather Impact",
-    "Counter Coverage",
     "Interactive Dashboard",
     "Conclusion",
 ]
@@ -831,8 +752,6 @@ elif page == "Cycling Patterns":
     show_cycling_patterns_page(traffic)
 elif page == "Weather Impact":
     show_weather_impact_page(traffic)
-elif page == "Counter Coverage":
-    show_counter_coverage_page(summary)
 elif page == "Conclusion":
     show_conclusion_page()
 else:
@@ -849,13 +768,12 @@ else:
 
     show_kpis(filtered, summary)
 
-    overview_tab, traffic_tab, weather_tab, map_tab, coverage_tab, data_tab = st.tabs(
+    overview_tab, traffic_tab, weather_tab, map_tab, data_tab = st.tabs(
         [
             "Overview",
             "Traffic Patterns",
             "Weather & Holidays",
             "Map",
-            "Coverage",
             "Data",
         ]
     )
@@ -882,7 +800,7 @@ else:
                 - Weekday traffic is stronger than weekend traffic.
                 - School holidays reduce cycling volume, especially during commute periods.
                 - Rain and snowfall are associated with lower cycling counts.
-                - Some central arrondissements have high traffic but relatively low meter coverage.
+                - The map highlights where cycling counter activity is concentrated.
                 """
             )
 
@@ -913,14 +831,9 @@ else:
     with map_tab:
         plot_map(filtered)
 
-    with coverage_tab:
-        plot_coverage(summary)
-
     with data_tab:
         st.subheader("Filtered Traffic Data")
         st.dataframe(filtered, width="stretch", hide_index=True)
-        st.subheader("Arrondissement Coverage Summary")
-        st.dataframe(summary, width="stretch", hide_index=True)
 
 st.caption(
     "Project by Sascha Behrens, Victoria Ford, and Stefania Licciardi - Data Analytics Bootcamp"
