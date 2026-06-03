@@ -344,7 +344,6 @@ def show_intro_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     with right:
         if HERO_IMAGE_PATH.exists():
             st.image(HERO_IMAGE_PATH, width="stretch")
-            st.caption("Generated editorial image for the dashboard introduction.")
 
     c1, c2, c3 = st.columns(3)
     c1.metric("Total bicycle countings", f"{total_countings:,.0f}")
@@ -537,10 +536,6 @@ def show_conclusion_page() -> None:
         - Add predictive modeling for expected traffic under different weather conditions.
         """
     )
-    show_takeaway(
-        "New counter placement should prioritize arrondissements where cycling activity is intense but meter coverage is relatively low."
-    )
-
 
 def show_kpis(summary: pd.DataFrame) -> None:
     col1, col2, col3 = st.columns(3)
