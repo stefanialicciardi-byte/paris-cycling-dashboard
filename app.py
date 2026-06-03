@@ -767,6 +767,9 @@ def show_coverage_legend() -> None:
         - **Balanced:** Cycling meter coverage is proportional to traffic
         """
     )
+    show_takeaway(
+        "High-traffic areas such as the 3rd, 7th, 10th, and 11th arrondissements show coverage gaps, suggesting a need for additional counters."
+    )
 
 
 require_files()
