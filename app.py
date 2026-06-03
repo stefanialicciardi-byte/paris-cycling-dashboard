@@ -428,10 +428,6 @@ def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
     )
     st.dataframe(source_table, hide_index=True, width="stretch")
 
-    show_takeaway(
-        "The source layer answers what was measured: bicycle counts, weather conditions, and whether each day fell during a school-holiday period."
-    )
-
 
 def show_data_preparation_page(df: pd.DataFrame) -> None:
     show_page_title(
@@ -524,7 +520,6 @@ def show_conclusion_page() -> None:
         - Rain and snowfall are linked with lower cycling counts.
         - Counter meters are not evenly distributed across Paris.
         - Some busy central areas appear under-covered because their traffic share is higher than their meter share.
-        - The 3e arrondissement is strongly under-covered, while the 12e arrondissement is over-covered relative to cycling demand.
 
         **Future improvements**
 
@@ -896,5 +891,5 @@ else:
         plot_map(summary)
 
 st.caption(
-    "Project by Sascha Behrens, Victoria Ford, and Stefania Licciardi - Data Analytics Bootcamp"
+    "Project by Stefania Licciardi, Victoria Ford, and Sascha Behrens - Data Analytics Bootcamp"
 )
