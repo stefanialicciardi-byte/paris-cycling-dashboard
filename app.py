@@ -49,6 +49,28 @@ ARRONDISSEMENT_AREA_KM2 = {
     19: 6.79,
     20: 5.98,
 }
+ARRONDISSEMENT_CENTROIDS = {
+    1: (48.8626, 2.3363),
+    2: (48.8680, 2.3426),
+    3: (48.8637, 2.3615),
+    4: (48.8543, 2.3570),
+    5: (48.8448, 2.3500),
+    6: (48.8493, 2.3320),
+    7: (48.8565, 2.3126),
+    8: (48.8770, 2.3170),
+    9: (48.8772, 2.3375),
+    10: (48.8760, 2.3600),
+    11: (48.8585, 2.3790),
+    12: (48.8408, 2.3880),
+    13: (48.8322, 2.3561),
+    14: (48.8331, 2.3264),
+    15: (48.8422, 2.2928),
+    16: (48.8637, 2.2769),
+    17: (48.8872, 2.3060),
+    18: (48.8925, 2.3444),
+    19: (48.8870, 2.3840),
+    20: (48.8630, 2.3980),
+}
 
 
 def inject_app_style() -> None:
@@ -189,11 +211,28 @@ def load_summary(path: Path) -> pd.DataFrame:
     summary["arrondissement_label"] = (
         summary["arrondissement"].astype(int).astype(str) + "e"
     )
+    summary["arrondissement_full"] = summary["arrondissement"].apply(
+        lambda value: (
+            "Paris 1er arrondissement"
+            if value == 1
+            else f"Paris {int(value)}e arrondissement"
+        )
+    )
+    summary["latitude"] = summary["arrondissement"].map(
+        lambda value: ARRONDISSEMENT_CENTROIDS[int(value)][0]
+    )
+    summary["longitude"] = summary["arrondissement"].map(
+        lambda value: ARRONDISSEMENT_CENTROIDS[int(value)][1]
+    )
     summary["coverage_status"] = "Over-covered"
-    summary.loc[summary["meters_vs_hourly_gap_pct"] < 0, "coverage_status"] = (
+    summary.loc[summary["meters_vs_hourly_gap_pct"] < -1, "coverage_status"] = (
         "Under-covered"
     )
+    summary.loc[summary["meters_vs_hourly_gap_pct"].abs() <= 1, "coverage_status"] = (
+        "Balanced"
+    )
     summary.loc[summary["n_rows"] == 0, "coverage_status"] = "No data"
+    summary["marker_size"] = summary["n_meters"].clip(lower=1)
     return summary.sort_values("arrondissement")
 
 
@@ -383,7 +422,7 @@ def show_data_sources_page(df: pd.DataFrame, summary: pd.DataFrame) -> None:
         {
             "Source": "Arrondissement coverage summary",
             "Role in project": "Area, meter count, and traffic share by arrondissement",
-            "Used for": "Coverage gap analysis",
+            "Used for": "Coverage-status map and arrondissement context",
         },
     ]
     st.dataframe(pd.DataFrame(rows), hide_index=True, width="stretch")
@@ -670,36 +709,39 @@ def plot_weather(filtered: pd.DataFrame, key_prefix: str) -> None:
     st.plotly_chart(fig_temp, width="stretch", key=f"{key_prefix}_temperature")
 
 
-def plot_map(filtered: pd.DataFrame) -> None:
-    map_data = (
-        filtered.groupby(
-            ["arrondissement", "latitude", "longitude", "coverage_status"],
-            as_index=False,
-        )
-        .agg(
-            avg_hourly_countings=("hourly_countings", "mean"),
-            total_hourly_countings=("hourly_countings", "sum"),
-        )
-    )
+def plot_map(summary: pd.DataFrame) -> None:
+    map_data = summary.copy()
     fig_map = px.scatter_map(
         map_data,
         lat="latitude",
         lon="longitude",
-        size="avg_hourly_countings",
+        size="marker_size",
         color="coverage_status",
-        hover_name="arrondissement",
+        color_discrete_map={
+            "Under-covered": "#EF4444",
+            "Balanced": "#2563EB",
+            "Over-covered": "#16A34A",
+            "No data": "#9CA3AF",
+        },
+        hover_name="arrondissement_full",
         hover_data={
-            "avg_hourly_countings": ":.1f",
-            "total_hourly_countings": ":,.0f",
+            "n_meters": ":,",
+            "total_hourly": ":,.0f",
+            "area_share_pct": ":.1f",
+            "meters_share_pct": ":.1f",
+            "hourly_share_pct": ":.1f",
+            "meters_vs_hourly_gap_pct": ":.1f",
+            "marker_size": False,
             "latitude": False,
             "longitude": False,
         },
         zoom=11,
         height=620,
-        title="Cycling Counters by Coverage Status",
+        title="Paris Cycling Counter Coverage by Arrondissement",
     )
     fig_map.update_layout(
         map_style="open-street-map",
+        legend_title="Coverage status",
         margin={"r": 0, "t": 45, "l": 0, "b": 0},
     )
     st.plotly_chart(fig_map, width="stretch")
@@ -829,7 +871,7 @@ else:
             st.plotly_chart(fig_corr, width="stretch")
 
     with map_tab:
-        plot_map(filtered)
+        plot_map(summary)
 
     with data_tab:
         st.subheader("Filtered Traffic Data")
